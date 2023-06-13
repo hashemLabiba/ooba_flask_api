@@ -11,6 +11,7 @@ ASYNC_MODE = "threading"  # gevent, eventlet will break ooba, as they monkey pat
 import uuid
 from flask import Flask, jsonify, request
 from flask_socketio import SocketIO
+import traceback
 
 import json
 from threading import Thread
@@ -52,6 +53,10 @@ def get_model_info():
         'shared.settings': shared.settings,
         'shared.args': vars(shared.args),
     }
+
+@app.route('/')
+def hello_world():
+    return "hello world"
 
 @app.route("/v1/model", methods=["GET", "POST"])
 @app.route("/api/v1/model", methods=["GET", "POST"])
@@ -167,11 +172,11 @@ def token_count():
 def _run_server():
     try:
         address = '0.0.0.0' if shared.args.listen else '127.0.0.1'
-        port = 5002
+        port = 9000
         print(f"Flask API running at http://{address}:{port}")
-        socketio.run(app, host=address, port=port)
+        socketio.run(app, host=address, port=port, allow_unsafe_werkzeug=True)
     except:
-        print("Unable to start", exc_info=True)
+        traceback.print_exc()
 
 def setup():
     thread = Thread(target=_run_server)
